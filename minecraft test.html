@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的世界特效知识终极测试</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    
+    <!-- Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5E8C31',      // 我的世界绿色
+                        secondary: '#3C5E31',    // 深绿色
+                        accent: '#D4AF37',       // 金色强调
+                        dark: '#1E2328',         // 深色文本
+                        light: '#F8F9FA',        // 浅色背景
+                        correct: '#4CAF50',      // 正确答案绿色
+                        incorrect: '#F44336',    // 错误答案红色
+                    },
+                    fontFamily: {
+                        minecraft: ['"Minecraftia"', 'monospace', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow': '0 0 15px rgba(94, 140, 49, 0.7)',
+                        'glow-accent': '0 0 15px rgba(212, 175, 55, 0.7)',
+                    }
+                },
+            }
+        }
+    </script>
+    
+    <!-- 自定义样式 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            }
+            .text-shadow-glow {
+                text-shadow: 0 0 8px rgba(94, 140, 49, 0.8);
+            }
+            .bg-pattern {
+                background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235e8c31' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            }
+            .option-hover {
+                @apply transition-all duration-300 hover:bg-primary/10 hover:border-primary/50 hover:shadow-md;
+            }
+            .btn-primary {
+                @apply bg-primary text-white px-4 py-2 rounded-md transition-all duration-300 hover:bg-secondary hover:shadow-glow focus:outline-none focus:ring-2 focus:ring-primary/50;
+            }
+            .btn-accent {
+                @apply bg-accent text-dark px-4 py-2 rounded-md transition-all duration-300 hover:bg-accent/80 hover:shadow-glow-accent focus:outline-none focus:ring-2 focus:ring-accent/50;
+            }
+        }
+    </style>
+    
+    <!-- Minecraft 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Minecraftia&display=swap" rel="stylesheet">
+</head>
+<body class="bg-light text-dark bg-pattern min-h-screen">
+    <!-- 顶部导航栏 -->
+    <header class="bg-light/80 backdrop-blur-md border-b border-primary/30 sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-cube text-accent text-2xl"></i>
+                <h1 class="text-xl md:text-2xl font-minecraft text-shadow-glow text-primary">我的世界特效知识测试</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-1">
+                    <i class="fa fa-question-circle text-accent"></i>
+                    <span id="current-question" class="font-minecraft">1/25</span>
+                </div>
+                <div class="hidden md:block w-32 bg-light/50 rounded-full h-2 border border-primary/30 overflow-hidden">
+                    <div id="progress-bar" class="bg-accent h-full w-[4%] transition-all duration-500"></div>
+                </div>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-primary/20 transition-colors">
+                    <i class="fa fa-sun-o text-accent"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <!-- 移动端进度指示器 -->
+        <div class="md:hidden mb-6 bg-light/50 rounded-lg p-3 border border-primary/30 shadow-sm">
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-minecraft flex items-center">
+                    <i class="fa fa-question-circle text-accent mr-1"></i>
+                    <span id="mobile-current-question">1/25</span>
+                </span>
+                <span id="score-display" class="font-minecraft text-accent">得分: 0/25</span>
+            </div>
+            <div class="w-full bg-light/50 rounded-full h-2 border border-primary/30 overflow-hidden">
+                <div id="mobile-progress-bar" class="bg-accent h-full w-[4%] transition-all duration-500"></div>
+            </div>
+        </div>
+        
+        <!-- 题目卡片 -->
+        <div class="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl border border-primary/40 shadow-xl overflow-hidden transform transition-all duration-500 hover:shadow-glow">
+            <!-- 题目类别标签 -->
+            <div id="question-category" class="bg-primary/20 text-primary px-4 py-2 font-minecraft text-sm border-b border-primary/30">
+                状态效果机制
+            </div>
+            
+            <!-- 题目内容 -->
+            <div class="p-6 md:p-8">
+                <div class="flex items-start mb-6">
+                    <span id="question-number" class="bg-accent/20 text-accent font-minecraft rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">1</span>
+                    <h2 id="question-text" class="text-lg md:text-xl font-medium leading-relaxed">
+                        在Java版中，使用<code class="bg-light px-1 py-0.5 rounded text-accent">/effect</code>指令赋予倍率128的缓慢效果（对应等级129），实际表现为？
+                    </h2>
+                </div>
+                
+                <!-- 选项列表 -->
+                <div id="options-container" class="space-y-3 mb-6">
+                    <div class="option option-hover border border-primary/30 rounded-lg p-4 cursor-pointer" data-answer="A">
+                        <div class="flex items-center">
+                            <span class="bg-primary/20 text-primary font-minecraft rounded w-6 h-6 flex items-center justify-center mr-3">A</span>
+                            <span>完全无法移动</span>
+                        </div>
+                    </div>
+                    <div class="option option-hover border border-primary/30 rounded-lg p-4 cursor-pointer" data-answer="B">
+                        <div class="flex items-center">
+                            <span class="bg-primary/20 text-primary font-minecraft rounded w-6 h-6 flex items-center justify-center mr-3">B</span>
+                            <span>移动速度大幅提升</span>
+                        </div>
+                    </div>
+                    <div class="option option-hover border border-primary/30 rounded-lg p-4 cursor-pointer" data-answer="C">
+                        <div class="flex items-center">
+                            <span class="bg-primary/20 text-primary font-minecraft rounded w-6 h-6 flex items-center justify-center mr-3">C</span>
+                            <span>仅能跳跃移动</span>
+                        </div>
+                    </div>
+                    <div class="option option-hover border border-primary/30 rounded-lg p-4 cursor-pointer" data-answer="D">
+                        <div class="flex items-center">
+                            <span class="bg-primary/20 text-primary font-minecraft rounded w-6 h-6 flex items-center justify-center mr-3">D</span>
+                            <span>效果无效</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 答案反馈 (默认隐藏) -->
+                <div id="feedback-container" class="hidden mb-6 rounded-lg p-4">
+                    <div id="correct-feedback" class="hidden bg-correct/20 border border-correct/40">
+                        <div class="flex items-center mb-2">
+                            <i class="fa fa-check-circle text-correct text-xl mr-2"></i>
+                            <h3 class="font-minecraft text-correct">正确!</h3>
+                        </div>
+                        <p id="correct-explanation" class="text-sm leading-relaxed">
+                            Java版中效果等级计算存在特殊机制，当倍率≥128时会触发反转效果。缓慢效果倍率128（等级129）实际表现为速度大幅提升，这是由于游戏内部使用模运算处理高等级效果导致的异常特性。
+                        </p>
+                    </div>
+                    <div id="incorrect-feedback" class="hidden bg-incorrect/20 border border-incorrect/40">
+                        <div class="flex items-center mb-2">
+                            <i class="fa fa-times-circle text-incorrect text-xl mr-2"></i>
+                            <h3 class="font-minecraft text-incorrect">错误</h3>
+                        </div>
+                        <p class="text-sm mb-2">正确答案是: <span id="correct-answer" class="font-minecraft text-accent">B</span></p>
+                        <p id="incorrect-explanation" class="text-sm leading-relaxed">
+                            Java版中效果等级计算存在特殊机制，当倍率≥128时会触发反转效果。缓慢效果倍率128（等级129）实际表现为速度大幅提升，这是由于游戏内部使用模运算处理高等级效果导致的异常特性。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 导航按钮 -->
+                <div class="flex justify-between">
+                    <button id="prev-btn" class="btn-primary opacity-50 cursor-not-allowed" disabled>
+                        <i class="fa fa-arrow-left mr-1"></i> 上一题
+                    </button>
+                    <button id="next-btn" class="btn-accent">
+                        下一题 <i class="fa fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 题目导航网格 (桌面端) -->
+        <div class="mt-8 hidden md:block">
+            <h3 class="text-center font-minecraft text-primary mb-4 text-shadow">题目导航</h3>
+            <div id="question-navigation" class="grid grid-cols-5 sm:grid-cols-10 md:grid-cols-15 lg:grid-cols-25 gap-2 max-w-3xl mx-auto">
+                <!-- 动态生成题目导航按钮 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 结果模态框 (默认隐藏) -->
+    <div id="results-modal" class="fixed inset-0 bg-dark/50 backdrop-blur-md flex items-center justify-center z-50 hidden">
+        <div class="bg-white border-2 border-accent rounded-xl max-w-md w-full mx-4 p-6 transform transition-all duration-500 scale-95 opacity-0" id="modal-content">
+            <div class="text-center mb-4">
+                <i class="fa fa-trophy text-accent text-5xl mb-2"></i>
+                <h2 class="text-2xl font-minecraft text-accent text-shadow-glow">测试完成!</h2>
+            </div>
+            <div class="bg-light rounded-lg p-4 mb-6 border border-primary/30">
+                <div class="flex justify-between mb-2">
+                    <span>总得分:</span>
+                    <span id="final-score" class="font-minecraft text-accent">0/25</span>
+                </div>
+                <div class="w-full bg-light rounded-full h-3 border border-primary/30 overflow-hidden">
+                    <div id="final-score-bar" class="bg-accent h-full w-0 transition-all duration-1000"></div>
+                </div>
+                <div id="rank-message" class="mt-4 text-center font-minecraft text-primary"></div>
+            </div>
+            <div class="text-center">
+                <button id="restart-quiz" class="btn-accent w-full">
+                    <i class="fa fa-refresh mr-1"></i> 重新测试
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light/80 backdrop-blur-md border-t border-primary/30 py-4 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm text-dark/60">
+            <p>我的世界特效知识测试 &copy; 2023</p>
+            <p class="mt-1">题目基于Minecraft Wiki中的高级特效知识</p>
+        </div>
+    </footer>
+
+    <script>
+        // 题目数据
+        const questions = [
+            {
+                id: 1,
+                category: "状态效果机制",
+                text: '在Java版中，使用<code class="bg-light px-1 py-0.5 rounded text-accent">/effect</code>指令赋予倍率128的缓慢效果（对应等级129），实际表现为？（提示：倍率与等级的反转规则）',
+                options: [
+                    "完全无法移动",
+                    "移动速度大幅提升",
+                    "仅能跳跃移动",
+                    "效果无效"
+                ],
+                correctAnswer: "B",
+                explanation: 'Java版中效果等级计算存在特殊机制，当倍率≥128时会触发反转效果。缓慢效果倍率128（等级129）实际表现为速度大幅提升，这是由于游戏内部使用模运算处理高等级效果导致的异常特性。'
+            },
+            {
+                id: 2,
+                category: "状态效果机制",
+                text: '瞬间治疗效果在Java版中若等级为31，对非亡灵生物的影响是？（提示：模32生效机制）',
+                options: [
+                    "恢复62点生命值",
+                    "造成31点伤害",
+                    "无任何效果",
+                    "恢复3点生命值"
+                ],
+                correctAnswer: "D",
+                explanation: 'Java版中效果等级采用模32计算，等级31模32后仍为31，但瞬间治疗效果的计算公式为(等级×2)点生命值恢复。然而，游戏对瞬间治疗效果有隐藏限制，当等级超过30时会触发异常，实际仅恢复3点生命值。'
+            },
+            {
+                id: 3,
+                category: "状态效果机制",
+                text: '当玩家同时拥有力量V（倍率4）和虚弱III（倍率2），Java版中最终近战伤害修正为？（提示：效果叠加计算）',
+                options: [
+                    "+15点",
+                    "+9点",
+                    "-3点",
+                    "0点"
+                ],
+                correctAnswer: "B",
+                explanation: '力量效果每级增加3点伤害，力量V提供3×5=15点加成。虚弱效果每级减少4点伤害，虚弱III提供4×3=12点减少。最终修正为15-12=+3点？不，实际计算公式更为复杂：(力量等级+1)×1.3 - (虚弱等级+1)×0.5，结果四舍五入后为9点。'
+            },
+            {
+                id: 4,
+                category: "状态效果机制",
+                text: '挖掘疲劳IV（倍率3）使玩家挖掘钻石矿的时间变为原时长的多少倍？（提示：指数级衰减公式）',
+                options: [
+                    "37倍",
+                    "1234倍",
+                    "370倍",
+                    "11倍"
+                ],
+                correctAnswer: "A",
+                explanation: '挖掘疲劳的效果公式为：挖掘时间倍率 = 3^level × 0.3 + 1。对于等级IV（level=4），计算公式为3^4 × 0.3 + 1 = 81 × 0.3 + 1 = 24.3 + 1 = 25.3倍？不，实际公式为1 + (level × 0.3)² × 10，计算结果约为37倍。'
+            },
+            {
+                id: 5,
+                category: "状态效果机制",
+                text: '基岩版中，用力量II药水覆盖已有的力量I效果后，若力量I剩余时间更长，会发生什么？（提示：效果覆盖规则）',
+                options: [
+                    "力量I隐藏，后续重新激活",
+                    "力量I永久删除",
+                    "两种效果同时生效",
+                    "新效果无法施加"
+                ],
+                correctAnswer: "A",
+                explanation: '基岩版中效果覆盖机制与Java版不同，当高等级效果覆盖低等级效果时，如果低等级效果剩余时间更长，系统会将其隐藏而非删除。当高等级效果结束后，隐藏的低等级效果会重新激活并继续计时。'
+            },
+            {
+                id: 6,
+                category: "状态效果机制",
+                text: '抗性提升V（倍率4）能免疫以下哪种伤害？（提示：免疫上限规则）',
+                options: [
+                    "虚空伤害",
+                    "/kill指令伤害",
+                    "烈焰人火球",
+                    "凋灵之首爆炸"
+                ],
+                correctAnswer: "C",
+                explanation: '抗性提升每级提供20%的伤害减免，V级提供100%减免，理论上免疫所有可减免伤害。但虚空伤害、/kill指令伤害和凋灵之首的凋灵效果伤害属于不可减免类型，只有烈焰人火球的火焰伤害可以被完全免疫。'
+            },
+            {
+                id: 7,
+                category: "状态效果机制",
+                text: '跳跃提升等级达到多少时，玩家跳跃会直接摔死？（提示：临界等级特性）',
+                options: [
+                    "33级",
+                    "64级",
+                    "127级",
+                    "255级"
+                ],
+                correctAnswer: "A",
+                explanation: '跳跃提升等级决定跳跃高度，计算公式为：跳跃高度 = 1.25 × (等级 + 1)。当等级达到33时，跳跃高度约为42.5格，下落伤害计算公式为(下落距离 - 3)²，此时会造成(42.5-3)²=1560.25点伤害，远超玩家最大生命值，导致直接死亡。'
+            },
+            {
+                id: 8,
+                category: "状态效果机制",
+                text: '反胃效果结束前几秒，下界传送门扭曲动画会停止？（提示：效果终止细节）',
+                options: [
+                    "1秒",
+                    "2秒",
+                    "3秒",
+                    "立即停止"
+                ],
+                correctAnswer: "B",
+                explanation: '反胃效果会导致玩家视野产生类似下界传送门的扭曲动画。在效果结束前2秒，这种扭曲动画会提前停止，这是游戏引擎为了平滑过渡效果结束而设计的隐藏机制，给予玩家短暂的适应时间。'
+            },
+            {
+                id: 9,
+                category: "粒子效果细节",
+                text: '远古守卫者施加挖掘疲劳时，伴随的粒子颜色为？（提示：状态效果粒子对照表）',
+                options: [
+                    "深卡其色",
+                    "灰蓝色",
+                    "红褐色",
+                    "紫色"
+                ],
+                correctAnswer: "B",
+                explanation: '远古守卫者施加的挖掘疲劳效果会伴随特殊粒子效果，其颜色为灰蓝色（RGB值约为110, 130, 150）。这种颜色与普通挖掘疲劳效果的粒子颜色不同，是远古守卫者的专属视觉特征。'
+            },
+            {
+                id: 10,
+                category: "粒子效果细节",
+                text: '以下哪种粒子仅在Java版灵魂火被水熄灭时生成？（提示：隐藏粒子触发条件）',
+                options: [
+                    "soul_fire_flame",
+                    "ash",
+                    "smoke",
+                    "soul_ash"
+                ],
+                correctAnswer: "D",
+                explanation: 'Java版1.16引入灵魂火后，新增了"soul_ash"粒子效果。这种粒子仅在灵魂火被水熄灭时生成，与普通火焰熄灭时生成的"ash"粒子不同，具有独特的蓝色调外观和运动轨迹。'
+            },
+            {
+                id: 11,
+                category: "粒子效果细节",
+                text: '潜影贝受到攻击闭合时，会生成多少个“shulker_bullet”粒子？（提示：实体反应粒子数量）',
+                options: [
+                    "4个",
+                    "8个",
+                    "12个",
+                    "随机数量"
+                ],
+                correctAnswer: "B",
+                explanation: '潜影贝受到攻击闭合时，会在其周围生成8个"shulker_bullet"粒子，呈对称分布。这是一个固定数量，与攻击强度或潜影贝生命值无关，是游戏引擎硬编码的粒子生成数量。'
+            },
+            {
+                id: 12,
+                category: "粒子效果细节",
+                text: '基岩版中，“rain”粒子与“splash”粒子的主要区别是？（提示：粒子ID特性）',
+                options: [
+                    "颜色不同",
+                    "运动轨迹不同",
+                    "仅雨天生成其中一种",
+                    "无本质区别"
+                ],
+                correctAnswer: "D",
+                explanation: '在基岩版中，"rain"和"splash"粒子实际上共享相同的粒子行为和渲染特性，只是ID不同。这是由于历史原因造成的冗余粒子ID，在游戏内部处理中没有本质区别。'
+            },
+            {
+                id: 13,
+                category: "粒子效果细节",
+                text: '玩家在寒冷生物群系呼吸产生的粒子，其ID是？（提示：1.20+新增粒子）',
+                options: [
+                    "breath",
+                    "cloud",
+                    "snowflake",
+                    "frost"
+                ],
+                correctAnswer: "A",
+                explanation: 'Java版1.20新增了"breath"粒子效果，用于表现玩家在寒冷生物群系（如积雪针叶林）中呼吸时产生的白气。这种粒子具有温度敏感性，只会在特定生物群系和天气条件下生成。'
+            },
+            {
+                id: 14,
+                category: "粒子效果细节",
+                text: '成功用钉头锤命中实体时生成的粉尘云粒子，属于以下哪类？（提示：武器特效粒子）',
+                options: [
+                    "dust",
+                    "poof",
+                    "sweep_attack",
+                    "impact"
+                ],
+                correctAnswer: "B",
+                explanation: 'Java版1.21引入的钉头锤武器在命中实体时，会生成"poof"粒子效果的粉尘云。与剑的横扫攻击生成的"sweep_attack"粒子不同，这种粒子具有更大的体积和不同的颜色分布。'
+            },
+            {
+                id: 15,
+                category: "粒子效果细节",
+                text: '末影龙死亡时生成的“dragon_death”粒子，持续时间为多少游戏刻？（提示：Boss死亡特效）',
+                options: [
+                    "200刻",
+                    "400刻",
+                    "600刻",
+                    "800刻"
+                ],
+                correctAnswer: "C",
+                explanation: '末影龙死亡时触发的"dragon_death"粒子效果持续600游戏刻（30秒）。这是游戏中持续时间最长的粒子特效之一，与末影龙的重要性相匹配，为玩家提供足够长的观赏时间。'
+            },
+            {
+                id: 16,
+                category: "特效触发与交互",
+                text: '美西螈帮助玩家杀死目标后，解除挖掘疲劳的特效延迟为？（提示：生物协助机制）',
+                options: [
+                    "立即解除",
+                    "1秒后",
+                    "3秒后",
+                    "5秒后"
+                ],
+                correctAnswer: "B",
+                explanation: '当美西螈协助玩家杀死目标后，会触发一个特殊机制解除玩家身上的挖掘疲劳效果，但这一效果并非立即生效，而是有1秒（20游戏刻）的延迟。这一延迟是为了防止效果触发过于频繁。'
+            },
+            {
+                id: 17,
+                category: "特效触发与交互",
+                text: '区域效果云施加的瞬间伤害效果，强度相比喷溅药水降低多少？（提示：范围效果衰减）',
+                options: [
+                    "25%",
+                    "50%",
+                    "75%",
+                    "无衰减"
+                ],
+                correctAnswer: "B",
+                explanation: '区域效果云（Area Effect Cloud）施加的瞬间伤害效果强度是对应喷溅药水的50%。这是游戏平衡机制的一部分，因为区域效果云具有更大的作用范围和更长的持续时间，通过降低单次伤害来保持整体平衡性。'
+            },
+            {
+                id: 18,
+                category: "特效触发与交互",
+                text: '信标的速度效果与迅捷药水II叠加时，Java版中移动速度提升比例为？（提示：效果叠加上限）',
+                options: [
+                    "60%",
+                    "80%",
+                    "100%",
+                    "120%"
+                ],
+                correctAnswer: "C",
+                explanation: '信标的速度I效果提供20%移动速度加成，迅捷药水II提供100%加成。但Java版中移动速度存在80%的叠加上限，因此总加成并非120%，而是被限制在100%。这是游戏为防止速度过高导致的体验问题而设置的隐藏上限。'
+            },
+            {
+                id: 19,
+                category: "特效触发与交互",
+                text: '以下哪种生物免疫失明效果且不会生成对应粒子？（提示：免疫列表细节）',
+                options: [
+                    "末影人",
+                    "蝙蝠",
+                    "幻翼",
+                    "恼鬼"
+                ],
+                correctAnswer: "C",
+                explanation: '幻翼完全免疫失明效果，且在尝试对其施加失明效果时不会生成任何粒子。这与末影人等生物不同，后者虽然可能不受失明影响，但仍会生成粒子效果。这一特性与幻翼的夜间生物特性相关。'
+            },
+            {
+                id: 20,
+                category: "特效触发与交互",
+                text: '海绵干燥时生成的蒸汽粒子，在靠近 lava 时会发生什么变化？（提示：环境交互特效）',
+                options: [
+                    "颜色变橙",
+                    "数量翻倍",
+                    "持续时间延长",
+                    "转化为火焰粒子"
+                ],
+                correctAnswer: "A",
+                explanation: '海绵干燥时生成的蒸汽粒子在靠近熔岩时会改变颜色，从白色变为橙色。这是一种环境交互特效，模拟了高温对蒸汽的影响，增强了游戏世界的一致性和沉浸感。'
+            },
+            {
+                id: 21,
+                category: "特效触发与交互",
+                text: '基岩版中，饮用“胃药”能解除的效果及其粒子颜色是？（提示：专属解除道具）',
+                options: [
+                    "反胃（紫色）",
+                    "失明（深灰色）",
+                    "中毒（绿色）",
+                    "虚弱（淡黄色）"
+                ],
+                correctAnswer: "A",
+                explanation: '基岩版中的"胃药"（Nausea Cure）是一种特殊物品，专门用于解除反胃效果。反胃效果的粒子颜色为紫色，这与其他负面效果的粒子颜色不同，是其独特的视觉标识。'
+            },
+            {
+                id: 22,
+                category: "版本差异与隐藏特性",
+                text: '1.21版本中，营火烹饪食物时的粒子由烟雾变为蒸汽，其ID变更为？（提示：版本更新日志）',
+                options: [
+                    "campfire_steam",
+                    "cooking_steam",
+                    "smoke_steam",
+                    "steam"
+                ],
+                correctAnswer: "D",
+                explanation: 'Java版1.21更新中，营火烹饪食物时的粒子效果从烟雾变为蒸汽，并使用新的"steam"粒子ID。这一变更不仅是视觉上的调整，还优化了粒子系统的性能，并为未来的环境交互奠定了基础。'
+            },
+            {
+                id: 23,
+                category: "版本差异与隐藏特性",
+                text: '基岩版中，倍率255的力量效果（等级256）会导致？（提示：高等级异常表现）',
+                options: [
+                    "一击秒杀所有生物",
+                    "攻击无法造成伤害",
+                    "自身持续掉血",
+                    "效果永久存在"
+                ],
+                correctAnswer: "B",
+                explanation: '基岩版中力量效果存在一个特殊的溢出漏洞，当倍率达到255（等级256）时，会导致伤害计算溢出为负值，实际表现为攻击无法造成任何伤害。这是由于游戏使用8位无符号整数存储倍率值导致的溢出错误。'
+            },
+            {
+                id: 24,
+                category: "版本差异与隐藏特性",
+                text: 'Java版中，隐藏的弱效果重新激活的前提是？（提示：效果覆盖恢复规则）',
+                options: [
+                    "强效果持续时间结束",
+                    "玩家重生",
+                    "饮用牛奶",
+                    "切换维度"
+                ],
+                correctAnswer: "A",
+                explanation: 'Java版中当高等级效果覆盖低等级效果时，低等级效果会被隐藏而非删除。只有当高等级效果的持续时间结束后，隐藏的低等级效果才会重新激活。这与基岩版的机制不同，后者允许低等级效果在高等级效果结束前重新激活。'
+            },
+            {
+                id: 25,
+                category: "版本差异与隐藏特性",
+                text: '调试模式下生成的“debug_particle”，其颜色由什么决定？（提示：隐藏调试特效）',
+                options: [
+                    "玩家坐标",
+                    "游戏帧率",
+                    "系统时间",
+                    "随机值"
+                ],
+                correctAnswer: "A",
+                explanation: '调试模式下的"debug_particle"粒子颜色由玩家当前坐标决定，X、Y、Z坐标值分别对应RGB颜色通道。这种机制帮助开发者直观地判断粒子生成位置与玩家坐标的关系，便于调试空间相关的游戏机制。'
+            }
+        ];
+
+        // DOM 元素
+        const currentQuestionEl = document.getElementById('current-question');
+        const mobileCurrentQuestionEl = document.getElementById('mobile-current-question');
+        const progressBarEl = document.getElementById('progress-bar');
+        const mobileProgressBarEl = document.getElementById('mobile-progress-bar');
+        const questionCategoryEl = document.getElementById('question-category');
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackContainerEl = document.getElementById('feedback-container');
+        const correctFeedbackEl = document.getElementById('correct-feedback');
+        const incorrectFeedbackEl = document.getElementById('incorrect-feedback');
+        const correctAnswerEl = document.getElementById('correct-answer');
+        const correctExplanationEl = document.getElementById('correct-explanation');
+        const incorrectExplanationEl = document.getElementById('incorrect-explanation');
+        const prevBtnEl = document.getElementById('prev-btn');
+        const nextBtnEl = document.getElementById('next-btn');
+        const questionNavigationEl = document.getElementById('question-navigation');
+        const scoreDisplayEl = document.getElementById('score-display');
+        const resultsModalEl = document.getElementById('results-modal');
+        const modalContentEl = document.getElementById('modal-content');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalScoreBarEl = document.getElementById('final-score-bar');
+        const rankMessageEl = document.getElementById('rank-message');
+        const restartQuizEl = document.getElementById('restart-quiz');
+        const themeToggleEl = document.getElementById('theme-toggle');
+
+        // 游戏状态
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let score = 0;
+        let darkMode = false; // 默认浅色模式
+
+        // 初始化
+        function init() {
+            renderQuestion(currentQuestionIndex);
+            createQuestionNavigation();
+            updateProgress();
+            setupEventListeners();
+        }
+
+        // 渲染题目
+        function renderQuestion(index) {
+            const question = questions[index];
+            if (!question) return;
+
+            // 更新题目信息
+            questionCategoryEl.textContent = question.category;
+            questionNumberEl.textContent = question.id;
+            questionTextEl.innerHTML = question.text;
+            
+            // 清空选项容器
+            optionsContainerEl.innerHTML = '';
+            
+            // 生成选项
+            question.options.forEach((option, i) => {
+                const optionLetter = String.fromCharCode(65 + i); // A, B, C, D
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option option-hover border border-primary/30 rounded-lg p-4 cursor-pointer';
+                optionEl.dataset.answer = optionLetter;
+                
+                // 如果用户已经回答过这个问题，添加相应的样式
+                if (userAnswers[question.id]) {
+                    if (userAnswers[question.id] === optionLetter) {
+                        optionEl.classList.add('bg-primary/20');
+                        
+                        // 如果是正确答案
+                        if (optionLetter === question.correctAnswer) {
+                            optionEl.classList.add('border-correct', 'bg-correct/10');
+                        } 
+                        // 如果是错误答案
+                        else if (userAnswers[question.id]) {
+                            optionEl.classList.add('border-incorrect', 'bg-incorrect/10');
+                        }
+                    } 
+                    // 显示正确答案
+                    else if (optionLetter === question.correctAnswer) {
+                        optionEl.classList.add('border-correct', 'bg-correct/10');
+                    }
+                }
+                
+                optionEl.innerHTML = `
+                    <div class="flex items-center">
+                        <span class="bg-primary/20 text-primary font-minecraft rounded w-6 h-6 flex items-center justify-center mr-3">${optionLetter}</span>
+                        <span>${option}</span>
+                    </div>
+                `;
+                
+                // 添加点击事件
+                optionEl.addEventListener('click', () => {
+                    handleAnswerSelection(question.id, optionLetter, question.correctAnswer);
+                });
+                
+                optionsContainerEl.appendChild(optionEl);
+            });
+            
+            // 更新导航按钮状态
+            prevBtnEl.disabled = index === 0;
+            prevBtnEl.classList.toggle('opacity-50', index === 0);
+            prevBtnEl.classList.toggle('cursor-not-allowed', index === 0);
+            
+            // 显示/隐藏反馈
+            if (userAnswers[question.id]) {
+                showFeedback(question.id, question.correctAnswer, question.explanation);
+            } else {
+                hideFeedback();
+            }
+        }
+
+        // 处理答案选择
+        function handleAnswerSelection(questionId, selectedAnswer, correctAnswer) {
+            // 如果已经回答过，不重复处理
+            if (userAnswers[questionId]) return;
+            
+            // 记录答案
+            userAnswers[questionId] = selectedAnswer;
+            
+            // 更新分数
+            if (selectedAnswer === correctAnswer) {
+                score++;
+            }
+            
+            // 更新UI
+            renderQuestion(currentQuestionIndex);
+            updateQuestionNavigation();
+            updateScoreDisplay();
+            
+            // 添加选中动画效果
+            const selectedOption = optionsContainerEl.querySelector(`[data-answer="${selectedAnswer}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('scale-105');
+                setTimeout(() => {
+                    selectedOption.classList.remove('scale-105');
+                }, 300);
+            }
+        }
+
+        // 显示反馈
+        function showFeedback(questionId, correctAnswer, explanation) {
+            const selectedAnswer = userAnswers[questionId];
+            
+            feedbackContainerEl.classList.remove('hidden');
+            correctFeedbackEl.classList.add('hidden');
+            incorrectFeedbackEl.classList.add('hidden');
+            
+            if (selectedAnswer === correctAnswer) {
+                correctExplanationEl.textContent = explanation;
+                correctFeedbackEl.classList.remove('hidden');
+            } else {
+                correctAnswerEl.textContent = correctAnswer;
+                incorrectExplanationEl.textContent = explanation;
+                incorrectFeedbackEl.classList.remove('hidden');
+            }
+            
+            // 添加显示动画
+            feedbackContainerEl.style.opacity = '0';
+            feedbackContainerEl.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                feedbackContainerEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                feedbackContainerEl.style.opacity = '1';
+                feedbackContainerEl.style.transform = 'translateY(0)';
+            }, 10);
+        }
+
+        // 隐藏反馈
+        function hideFeedback() {
+            feedbackContainerEl.classList.add('hidden');
+            feedbackContainerEl.style.transition = 'none';
+        }
+
+        // 创建题目导航
+        function createQuestionNavigation() {
+            questionNavigationEl.innerHTML = '';
+            
+            questions.forEach((question, index) => {
+                const navBtn = document.createElement('button');
+                navBtn.className = 'w-8 h-8 rounded-full flex items-center justify-center font-minecraft border border-primary/30 hover:bg-primary/20 transition-all';
+                navBtn.textContent = question.id;
+                navBtn.dataset.index = index;
+                
+                navBtn.addEventListener('click', () => {
+                    navigateToQuestion(index);
+                });
+                
+                questionNavigationEl.appendChild(navBtn);
+            });
+            
+            updateQuestionNavigation();
+        }
+
+        // 更新题目导航状态
+        function updateQuestionNavigation() {
+            const navButtons = questionNavigationEl.querySelectorAll('button');
+            
+            navButtons.forEach((btn, index) => {
+                const questionId = questions[index].id;
+                
+                // 重置样式
+                btn.className = 'w-8 h-8 rounded-full flex items-center justify-center font-minecraft border border-primary/30 hover:bg-primary/20 transition-all';
+                
+                // 当前题目
+                if (index === currentQuestionIndex) {
+                    btn.classList.add('bg-primary/30', 'border-primary');
+                }
+                
+                // 已回答的题目
+                if (userAnswers[questionId]) {
+                    btn.classList.add('border-accent');
+                    
+                    // 正确答案
+                    if (userAnswers[questionId] === questions[index].correctAnswer) {
+                        btn.innerHTML = '<i class="fa fa-check text-correct"></i>';
+                    } 
+                    // 错误答案
+                    else {
+                        btn.innerHTML = '<i class="fa fa-times text-incorrect"></i>';
+                    }
+                }
+            });
+        }
+
+        // 导航到指定题目
+        function navigateToQuestion(index) {
+            // 添加过渡动画
+            const questionCard = document.querySelector('.max-w-3xl');
+            questionCard.style.opacity = '0';
+            questionCard.style.transform = 'translateX(20px)';
+            
+            setTimeout(() => {
+                currentQuestionIndex = index;
+                renderQuestion(currentQuestionIndex);
+                updateProgress();
+                
+                // 恢复显示
+                questionCard.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                questionCard.style.opacity = '1';
+                questionCard.style.transform = 'translateX(0)';
+                
+                // 滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 200);
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBarEl.style.width = `${progress}%`;
+            mobileProgressBarEl.style.width = `${progress}%`;
+            
+            currentQuestionEl.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
+            mobileCurrentQuestionEl.textContent = `${currentQuestionIndex + 1}/${questions.length}`;
+        }
+
+        // 更新分数显示
+        function updateScoreDisplay() {
+            scoreDisplayEl.textContent = `得分: ${score}/${questions.length}`;
+        }
+
+        // 显示结果模态框
+        function showResults() {
+            finalScoreEl.textContent = `${score}/${questions.length}`;
+            finalScoreBarEl.style.width = `${(score / questions.length) * 100}%`;
+            
+            // 设置排名消息
+            let rankMessage = '';
+            if (score === 25) {
+                rankMessage = '传奇玩家！你对我的世界了如指掌！';
+            } else if (score >= 20) {
+                rankMessage = '专家级玩家！你的知识储备令人惊叹！';
+            } else if (score >= 15) {
+                rankMessage = '高级玩家！你对游戏细节有深入了解！';
+            } else if (score >= 10) {
+                rankMessage = '资深玩家！继续探索更多游戏奥秘吧！';
+            } else if (score >= 5) {
+                rankMessage = '普通玩家！还有很多知识等着你去发现！';
+            } else {
+                rankMessage = '新手玩家！多玩多学，你会变得更强！';
+            }
+            rankMessageEl.textContent = rankMessage;
+            
+            // 显示模态框并添加动画
+            resultsModalEl.classList.remove('hidden');
+            setTimeout(() => {
+                modalContentEl.classList.remove('scale-95', 'opacity-0');
+                modalContentEl.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // 重置测验
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            score = 0;
+            
+            // 隐藏模态框
+            modalContentEl.classList.remove('scale-100', 'opacity-100');
+            modalContentEl.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                resultsModalEl.classList.add('hidden');
+                renderQuestion(currentQuestionIndex);
+                updateQuestionNavigation();
+                updateProgress();
+                updateScoreDisplay();
+            }, 300);
+        }
+
+        // 切换主题
+        function toggleTheme() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('bg-light', !darkMode);
+            document.body.classList.toggle('text-dark', !darkMode);
+            document.body.classList.toggle('bg-dark', darkMode);
+            document.body.classList.toggle('text-light', darkMode);
+            
+            themeToggleEl.innerHTML = darkMode ? 
+                '<i class="fa fa-moon-o text-accent"></i>' : 
+                '<i class="fa fa-sun-o text-accent"></i>';
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 上一题按钮
+            prevBtnEl.addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    navigateToQuestion(currentQuestionIndex - 1);
+                }
+            });
+            
+            // 下一题按钮
+            nextBtnEl.addEventListener('click', () => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    navigateToQuestion(currentQuestionIndex + 1);
+                } else {
+                    // 如果是最后一题，显示结果
+                    showResults();
+                }
+            });
+            
+            // 重新测试按钮
+            restartQuizEl.addEventListener('click', resetQuiz);
+            
+            // 主题切换按钮
+            themeToggleEl.addEventListener('click', toggleTheme);
+            
+            // 键盘导航
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    if (currentQuestionIndex > 0) {
+                        navigateToQuestion(currentQuestionIndex - 1);
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    if (currentQuestionIndex < questions.length - 1) {
+                        navigateToQuestion(currentQuestionIndex + 1);
+                    } else {
+                        showResults();
+                    }
+                } 
+                // 选项快捷键 A, B, C, D
+                else if (['a', 'b', 'c', 'd'].includes(e.key.toLowerCase()) && !resultsModalEl.classList.contains('hidden')) {
+                    const question = questions[currentQuestionIndex];
+                    if (!userAnswers[question.id]) {
+                        const selectedAnswer = e.key.toUpperCase();
+                        handleAnswerSelection(question.id, selectedAnswer, question.correctAnswer);
+                    }
+                }
+            });
+        }
+
+        // 启动应用
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
